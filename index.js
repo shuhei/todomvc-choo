@@ -16,12 +16,12 @@ app.model({
     add: (action, state) => ({
       counter: state.counter + 1,
       name: '',
-      todos: [...state.todos, { id: state.counter, name: action.payload, done: false }]
+      todos: [...state.todos, { id: state.counter, name: state.name, done: false }]
     }),
     toggle: (action, state) => ({
       todos: state.todos.map(todo => {
         if (todo.id === action.payload) {
-          return { id: todo.id, name: todo.name, done: !todo.done }
+          return Object.assign({}, todo, { done: !todo.done })
         } else {
           return todo
         }
@@ -29,40 +29,87 @@ app.model({
     }),
     delete: (action, state) => ({
       todos: state.todos.filter(todo => todo.id !== action.payload)
-    })
+    }),
+    clearCompleted: (action, state) => ({
+      todos: state.todos.filter(todo => !todo.done)
+    }),
+    toggleAll: (action, state) => {
+      const allDone = state.todos.every(todo => todo.done)
+      return {
+        todos: state.todos.map(todo => Object.assign({}, todo, { done: !allDone }))
+      }
+    }
   },
   effects: {
   }
 })
 
 const todoView = (todo, send) => choo.view`
-  <li style="${todo.done ? 'text-decoration: line-through' : ''}">
-    <input
-      type="checkbox"
-      checked="${todo.done}"
-      onchange=${e => send('toggle', { payload: todo.id })} />
-    <span>${todo.name}</span>
-    <button onclick=${e => send('delete', { payload: todo.id })}>Delete</button>
+  <li class=${todo.done ? 'completed' : ''}>
+    <div class="view">
+      <input
+        type="checkbox"
+        class="toggle"
+        checked="${todo.done}"
+        onchange=${e => send('toggle', { payload: todo.id })} />
+      <label>${todo.name}</label>
+      <button class="destroy" onclick=${e => send('delete', { payload: todo.id })}></button>
+      <input class="edit" value=${todo.name} />
+    </div>
   </li>
 `
 
+const filterTodos = (todos, filter) => {
+  switch (filter) {
+    case 'active': return todos.filter(todo => !todo.done)
+    case 'completed': return todos.filter(todo => todo.done)
+    default: return todos
+  }
+}
+
+const clearCompletedButton = (send) => choo.view`
+  <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
+`
+
 const mainView = (params, state, send) => choo.view`
-  <main class="app" style="font-family: sans-serif; font-size: 2em;">
-    <h1>todos</h1>
-    <label>Add todo:</label>
-    <input
-      type="text"
-      placeholder="What needs to be done?"
-      value=${state.name}
-      onchange=${e => send('update', { payload: e.target.value })}
-      onkeydown=${e => e.code === 'Enter' && send('add', { payload: e.target.value }) || true}/>
-    <ul>${state.todos.map(todo => todoView(todo, send))}</ul>
-    <p>${state.todos.filter(todo => !todo.done).length} items left</p>
-  </main>
+  <section class="todoapp">
+    <header class="header">
+      <h1>todos</h1>
+      <input
+        class="new-todo"
+        placeholder="What needs to be done?"
+        value=${state.name}
+        oninput=${e => send('update', { payload: e.target.value })}
+        onkeydown=${e => e.code === 'Enter' && send('add') || true}
+        autofocus
+        />
+    </header>
+    <section class="main">
+      <input
+        class="toggle-all"
+        type="checkbox"
+        checked=${state.todos.every(todo => todo.done)}
+        onchange=${e => send('toggleAll')} />
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list">${filterTodos(state.todos, params.filter).map(todo => todoView(todo, send))}</ul>
+    </section>
+    <footer class="footer">
+      <span class="todo-count">
+        <strong>${state.todos.filter(todo => !todo.done).length}</strong>
+        item${state.todos.length === 1 ? '' : 's'} left
+      </span>
+      <ul class="filters">
+        <li><a href="/">All</a></li>
+        <li><a href="/active">Active</a></li>
+        <li><a href="/completed">Completed</a></li>
+      </ul>
+      ${state.todos.some(todo => todo.done) ? clearCompletedButton(send) : ''}
+    </footer>
+  </section>
 `
 
 app.router((route) => [
-  route('/', mainView)
+  route('/:filter', mainView)
 ])
 
 const tree = app.start()
