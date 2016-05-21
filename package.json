@@ -4,7 +4,8 @@
   "description": "An todo app with choo",
   "main": "index.js",
   "scripts": {
-    "start": "budo --css=node_modules/todomvc-common/base.css --css=node_modules/todomvc-app-css/index.css --open index.js"
+    "compile": "browserify -o dist/index.js index.js",
+    "start": "budo -s dist/index.js --open index.js"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "todomvc-common": "^1.0.2"
   },
   "devDependencies": {
+    "browserify": "^13.0.1",
     "budo": "^8.2.2"
   }
 }
