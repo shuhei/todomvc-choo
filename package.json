@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run copy && budo index.js --serve=dist/index.js --open -- -t babelify",
     "copy": "mkdir -p dist && cp node_modules/todomvc-{common/base,app-css/index}.css dist/",
-    "compile": "npm run copy && browserify index.js -o dist/index.js -t babelify"
+    "compile": "npm run copy && browserify index.js -o dist/index.js -t babelify",
+    "gh-pages": "git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
   "license": "MIT",
