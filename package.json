@@ -1,5 +1,5 @@
 {
-  "name": "choodoomvc",
+  "name": "todomvc-choo",
   "version": "1.0.0",
   "description": "A todo app with choo",
   "main": "index.js",
