@@ -10,8 +10,11 @@ const handleEditKeydown = (e, todo, send) => {
   }
 }
 
+const classList =
+  classes => Object.keys(classes).reduce((acc, k) => classes[k] ? acc.push(k) && acc : acc, []).join(' ')
+
 const todoItemView = (todo, editing, send) => choo.view`
-  <li class=${[todo.done ? 'completed' : null, editing ? 'editing' : null].filter(Boolean).join(' ')}>
+  <li class=${classList({ completed : todo.done, editing: editing })}>
     <div class="view">
       <input
         type="checkbox"
@@ -28,8 +31,7 @@ const todoItemView = (todo, editing, send) => choo.view`
       class="edit"
       value=${todo.name}
       onkeydown=${e => handleEditKeydown(e, todo, send)}
-      onblur=${e => update(e, todo, send)}
-      />
+      onblur=${e => update(e, todo, send)} />
   </li>
 `
 

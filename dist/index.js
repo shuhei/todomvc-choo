@@ -1,113 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 const choo = require('choo')
-const todoListView = require('./todo-list')
-
-const clearCompletedButton = (send) => choo.view`
-  <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
-`
-
-const selectedClass = (params, filter) => params.filter === filter ? 'selected' : ''
-
-module.exports = (params, state, send) => choo.view`
-  <section class="todoapp">
-    <header class="header">
-      <h1>todos</h1>
-      <input
-        class="new-todo"
-        placeholder="What needs to be done?"
-        value=${state.name}
-        oninput=${e => send('updateNew', { payload: e.target.value })}
-        onkeydown=${e => e.code === 'Enter' && send('add') || true}
-        autofocus
-        />
-    </header>
-    <section class="main">
-      <input
-        class="toggle-all"
-        type="checkbox"
-        checked=${state.todos.every(todo => todo.done)}
-        onchange=${e => send('toggleAll')} />
-      <label for="toggle-all">Mark all as complete</label>
-      ${todoListView(params, state, send)}
-    </section>
-    <footer class="footer">
-      <span class="todo-count">
-        <strong>${state.todos.filter(todo => !todo.done).length}</strong>
-        item${state.todos.length === 1 ? '' : 's'} left
-      </span>
-      <ul class="filters">
-        <li><a href="/" class=${selectedClass(params, '')}>All</a></li>
-        <li><a href="/active" class=${selectedClass(params, 'active')}>Active</a></li>
-        <li><a href="/completed" class=${selectedClass(params, 'completed')}>Completed</a></li>
-      </ul>
-      ${state.todos.some(todo => todo.done) ? clearCompletedButton(send) : ''}
-    </footer>
-  </section>
-`
-
-},{"./todo-list":3,"choo":10}],2:[function(require,module,exports){
-const choo = require('choo')
-
-const update = (e, todo, send) => send('update', { payload: { id: todo.id, name: e.target.value } })
-
-const handleEditKeydown = (e, todo, send) => {
-  if (e.code === 'Enter') {
-    update(e, todo, send)
-  } else if (e.code === 'Escape') {
-    send('cancelEditing');
-  }
-}
-
-const todoItemView = (todo, editing, send) => choo.view`
-  <li class=${[todo.done ? 'completed' : null, editing ? 'editing' : null].filter(Boolean).join(' ')}>
-    <div class="view">
-      <input
-        type="checkbox"
-        class="toggle"
-        checked="${todo.done}"
-        onchange=${e => send('toggle', { payload: todo.id })} />
-      <label ondblclick=${e => send('edit', { payload: todo.id })}>${todo.name}</label>
-      <button
-        class="destroy"
-        onclick=${e => send('delete', { payload: todo.id })}
-        ></button>
-    </div>
-    <input
-      class="edit"
-      value=${todo.name}
-      onkeydown=${e => handleEditKeydown(e, todo, send)}
-      onblur=${e => update(e, todo, send)}
-      />
-  </li>
-`
-
-module.exports = todoItemView
-
-},{"choo":10}],3:[function(require,module,exports){
-const choo = require('choo')
-const todoItemView = require('./todo-item')
-
-const filterTodos = (todos, filter) => {
-  switch (filter) {
-    case 'active': return todos.filter(todo => !todo.done)
-    case 'completed': return todos.filter(todo => todo.done)
-    default: return todos
-  }
-}
-
-const filteredTodos = (state, filter, send) =>
-  filterTodos(state.todos, filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
-
-
-const todoListView = (params, state, send) => choo.view`
-  <ul class="todo-list">${filteredTodos(state, params.filter, send)}</ul>
-`
-
-module.exports = todoListView
-
-},{"./todo-item":2,"choo":10}],4:[function(require,module,exports){
-const choo = require('choo')
-const mainView = require('./elements/main')
+const mainView = require('./views/main')
 
 const app = choo()
 app.model(require('./model'))
@@ -119,45 +12,64 @@ app.router((route) => [
 const tree = app.start()
 document.body.appendChild(tree)
 
-},{"./elements/main":1,"./model":5,"choo":10}],5:[function(require,module,exports){
+},{"./model":2,"./views/main":28,"choo":7}],2:[function(require,module,exports){
+const xtend = require('xtend')
+
+const STORAGE_ID = 'todos-choo'
+const save = (action, state, send) => {
+  const data = {
+    counter: state.counter,
+    todos: state.todos
+  }
+  localStorage.setItem(STORAGE_ID, JSON.stringify(data))
+}
+
+const init = (send) => {
+  setTimeout(() => {
+    const json = localStorage.getItem(STORAGE_ID)
+    if (json) {
+      send('init', { payload: JSON.parse(json) })
+    }
+  }, 1)
+}
+
 module.exports = {
   state: {
-    counter: 0,
+    // UI state
     editing: null,
     name: '',
+    // real state
+    counter: 0,
     todos: []
   },
   reducers: {
+    init: (action, state) => ({ counter: action.payload.counter, todos: action.payload.todos }),
     updateNew: (action, state) => ({ name: action.payload }),
     add: (action, state) => ({
       counter: state.counter + 1,
       name: '',
-      todos: [...state.todos, { id: state.counter, name: state.name, done: false }]
+      todos: state.todos.concat({ id: state.counter, name: state.name, done: false })
     }),
     toggle: (action, state) => ({
       todos: state.todos.map(todo => {
         if (todo.id === action.payload) {
-          return Object.assign({}, todo, { done: !todo.done })
+          return xtend({}, todo, { done: !todo.done })
         } else {
           return todo
         }
       })
     }),
-    edit: (action, state) => ({
-      editing: action.payload
-    }),
+    edit: (action, state) => ({ editing: action.payload }),
+    cancelEditing: (action, state) => ({ editing: null }),
     update: (action, state) => ({
       editing: null,
       todos: state.todos.map(todo => {
         if (todo.id === action.payload.id) {
-          return Object.assign({}, todo, { name: action.payload.name })
+          return xtend({}, todo, { name: action.payload.name })
         } else {
           return todo
         }
       })
-    }),
-    cancelEditing: (action, state) => ({
-      editing: null
     }),
     delete: (action, state) => ({
       todos: state.todos.filter(todo => todo.id !== action.payload)
@@ -168,15 +80,22 @@ module.exports = {
     toggleAll: (action, state) => {
       const allDone = state.todos.every(todo => todo.done)
       return {
-        todos: state.todos.map(todo => Object.assign({}, todo, { done: !allDone }))
+        todos: state.todos.map(todo => xtend({}, todo, { done: !allDone }))
       }
     }
   },
   effects: {
-  }
+    add: save,
+    toggle: save,
+    update: save,
+    delete: save,
+    clearCompleted: save,
+    toggleAll: save
+  },
+  subscriptions: [init]
 }
 
-},{}],6:[function(require,module,exports){
+},{"xtend":24}],3:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -537,7 +456,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":24}],7:[function(require,module,exports){
+},{"util/":21}],4:[function(require,module,exports){
 var document = require('global/document')
 var hyperx = require('hyperx')
 
@@ -658,9 +577,9 @@ function belCreateElement (tag, props, children) {
 module.exports = hyperx(belCreateElement)
 module.exports.createElement = belCreateElement
 
-},{"global/document":11,"hyperx":14}],8:[function(require,module,exports){
+},{"global/document":8,"hyperx":11}],5:[function(require,module,exports){
 
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -756,7 +675,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],10:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 const history = require('sheet-router/history')
 const sheetRouter = require('sheet-router')
 const document = require('global/document')
@@ -909,7 +828,7 @@ function apply (name, source, target) {
   })
 }
 
-},{"global/document":11,"send-action":18,"sheet-router":21,"sheet-router/history":19,"sheet-router/href":20,"xtend":27,"yo-yo":29}],11:[function(require,module,exports){
+},{"global/document":8,"send-action":15,"sheet-router":18,"sheet-router/history":16,"sheet-router/href":17,"xtend":24,"yo-yo":26}],8:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -928,7 +847,7 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":8}],12:[function(require,module,exports){
+},{"min-document":5}],9:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window;
@@ -941,7 +860,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -962,7 +881,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],14:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -1227,7 +1146,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":13}],15:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":10}],12:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1252,7 +1171,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],16:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // Create a range object for efficently rendering strings to elements.
 var range;
 
@@ -1751,7 +1670,7 @@ function morphdom(fromNode, toNode, options) {
 
 module.exports = morphdom;
 
-},{}],17:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 const assert = require('assert')
 
 module.exports = match
@@ -1771,7 +1690,7 @@ function match (route) {
     .replace(/\/$/, '')
 }
 
-},{"assert":6}],18:[function(require,module,exports){
+},{"assert":3}],15:[function(require,module,exports){
 var extend = require('xtend')
 
 module.exports = function sendAction (options) {
@@ -1809,7 +1728,7 @@ module.exports = function sendAction (options) {
   return send
 }
 
-},{"xtend":27}],19:[function(require,module,exports){
+},{"xtend":24}],16:[function(require,module,exports){
 const document = require('global/document')
 const window = require('global/window')
 const assert = require('assert')
@@ -1826,7 +1745,7 @@ function history (cb) {
   }
 }
 
-},{"assert":6,"global/document":11,"global/window":12}],20:[function(require,module,exports){
+},{"assert":3,"global/document":8,"global/window":9}],17:[function(require,module,exports){
 const window = require('global/window')
 const assert = require('assert')
 
@@ -1857,7 +1776,7 @@ function href (cb) {
   }
 }
 
-},{"assert":6,"global/window":12}],21:[function(require,module,exports){
+},{"assert":3,"global/window":9}],18:[function(require,module,exports){
 const pathname = require('pathname-match')
 const wayfarer = require('wayfarer')
 const assert = require('assert')
@@ -1926,7 +1845,7 @@ function r (route, inline, child) {
   return [ route, inline, child ]
 }
 
-},{"assert":6,"pathname-match":17,"wayfarer":25}],22:[function(require,module,exports){
+},{"assert":3,"pathname-match":14,"wayfarer":22}],19:[function(require,module,exports){
 
 /**
  * An Array.prototype.slice.call(arguments) alternative
@@ -1961,14 +1880,14 @@ module.exports = function (args, slice, sliceEnd) {
 }
 
 
-},{}],23:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],24:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2558,7 +2477,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":23,"_process":9,"inherits":15}],25:[function(require,module,exports){
+},{"./support/isBuffer":20,"_process":6,"inherits":12}],22:[function(require,module,exports){
 const assert = require('assert')
 const sliced = require('sliced')
 const trie = require('./trie')
@@ -2620,7 +2539,7 @@ function Wayfarer (dft) {
   }
 }
 
-},{"./trie":26,"assert":6,"sliced":22}],26:[function(require,module,exports){
+},{"./trie":23,"assert":3,"sliced":19}],23:[function(require,module,exports){
 const mutate = require('xtend/mutable')
 const assert = require('assert')
 const xtend = require('xtend')
@@ -2737,7 +2656,7 @@ Trie.prototype.mount = function (route, trie) {
   }
 }
 
-},{"assert":6,"xtend":27,"xtend/mutable":28}],27:[function(require,module,exports){
+},{"assert":3,"xtend":24,"xtend/mutable":25}],24:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -2758,7 +2677,7 @@ function extend() {
     return target
 }
 
-},{}],28:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -2777,7 +2696,7 @@ function extend(target) {
     return target
 }
 
-},{}],29:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var bel = require('bel') // turns template tag into DOM elements
 var morphdom = require('morphdom') // efficiently diffs + morphs two DOM elements
 var defaultEvents = require('./update-events.js') // default events to be copied when dom elements update
@@ -2813,7 +2732,7 @@ module.exports.update = function (fromNode, toNode, opts) {
   }
 }
 
-},{"./update-events.js":30,"bel":7,"morphdom":16}],30:[function(require,module,exports){
+},{"./update-events.js":27,"bel":4,"morphdom":13}],27:[function(require,module,exports){
 module.exports = [
   // attribute events (can be set with attributes)
   'onclick',
@@ -2851,4 +2770,113 @@ module.exports = [
   'onfocusout'
 ]
 
-},{}]},{},[4]);
+},{}],28:[function(require,module,exports){
+const choo = require('choo')
+const todoListView = require('./todo-list')
+
+const clearCompletedButton = (send) => choo.view`
+  <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
+`
+
+const selectedClass = (params, filter) => params.filter === filter ? 'selected' : ''
+
+module.exports = (params, state, send) => choo.view`
+  <section class="todoapp">
+    <header class="header">
+      <h1>todos</h1>
+      <input
+        class="new-todo"
+        placeholder="What needs to be done?"
+        value=${state.name}
+        oninput=${e => send('updateNew', { payload: e.target.value })}
+        onkeydown=${e => e.code === 'Enter' && send('add') || true}
+        autofocus
+        />
+    </header>
+    <section class="main">
+      <input
+        class="toggle-all"
+        type="checkbox"
+        checked=${state.todos.every(todo => todo.done)}
+        onchange=${e => send('toggleAll')} />
+      <label for="toggle-all">Mark all as complete</label>
+      ${todoListView(params, state, send)}
+    </section>
+    <footer class="footer">
+      <span class="todo-count">
+        <strong>${state.todos.filter(todo => !todo.done).length}</strong>
+        item${state.todos.length === 1 ? '' : 's'} left
+      </span>
+      <ul class="filters">
+        <li><a href="/" class=${selectedClass(params, '')}>All</a></li>
+        <li><a href="/active" class=${selectedClass(params, 'active')}>Active</a></li>
+        <li><a href="/completed" class=${selectedClass(params, 'completed')}>Completed</a></li>
+      </ul>
+      ${state.todos.some(todo => todo.done) ? clearCompletedButton(send) : ''}
+    </footer>
+  </section>
+`
+
+},{"./todo-list":30,"choo":7}],29:[function(require,module,exports){
+const choo = require('choo')
+
+const update = (e, todo, send) => send('update', { payload: { id: todo.id, name: e.target.value } })
+
+const handleEditKeydown = (e, todo, send) => {
+  if (e.code === 'Enter') {
+    update(e, todo, send)
+  } else if (e.code === 'Escape') {
+    send('cancelEditing');
+  }
+}
+
+const classList =
+  classes => Object.keys(classes).reduce((acc, k) => classes[k] ? acc.push(k) && acc : acc, []).join(' ')
+
+const todoItemView = (todo, editing, send) => choo.view`
+  <li class=${classList({ completed : todo.done, editing: editing })}>
+    <div class="view">
+      <input
+        type="checkbox"
+        class="toggle"
+        checked="${todo.done}"
+        onchange=${e => send('toggle', { payload: todo.id })} />
+      <label ondblclick=${e => send('edit', { payload: todo.id })}>${todo.name}</label>
+      <button
+        class="destroy"
+        onclick=${e => send('delete', { payload: todo.id })}
+        ></button>
+    </div>
+    <input
+      class="edit"
+      value=${todo.name}
+      onkeydown=${e => handleEditKeydown(e, todo, send)}
+      onblur=${e => update(e, todo, send)} />
+  </li>
+`
+
+module.exports = todoItemView
+
+},{"choo":7}],30:[function(require,module,exports){
+const choo = require('choo')
+const todoItemView = require('./todo-item')
+
+const filterTodos = (todos, filter) => {
+  switch (filter) {
+    case 'active': return todos.filter(todo => !todo.done)
+    case 'completed': return todos.filter(todo => todo.done)
+    default: return todos
+  }
+}
+
+const filteredTodos = (state, filter, send) =>
+  filterTodos(state.todos, filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
+
+
+const todoListView = (params, state, send) => choo.view`
+  <ul class="todo-list">${filteredTodos(state, params.filter, send)}</ul>
+`
+
+module.exports = todoListView
+
+},{"./todo-item":29,"choo":7}]},{},[1]);

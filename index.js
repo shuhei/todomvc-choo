@@ -1,5 +1,5 @@
 const choo = require('choo')
-const mainView = require('./elements/main')
+const mainView = require('./views/main')
 
 const app = choo()
 app.model(require('./model'))

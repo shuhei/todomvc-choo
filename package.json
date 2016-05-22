@@ -1,7 +1,7 @@
 {
-  "name": "choodo",
+  "name": "choodoo-mvc",
   "version": "1.0.0",
-  "description": "An todo app with choo",
+  "description": "A todo app with choo",
   "main": "index.js",
   "scripts": {
     "compile": "browserify -o dist/index.js index.js",
