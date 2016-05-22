@@ -1,6 +1,8 @@
-# choodoo
+# [choo](https://github.com/yoshuawuyts/choo) • [TodoMVC](http://todomvc.com/)
 
-A TodoMVC app built with [choo](https://github.com/yoshuawuyts/choo).
+>:steam_locomotive::train::train::train::train::train: - _The little framework that could._
+>
+>A framework for creating sturdy web applications. Built on years of industry experience it distills the essence of functional architectures into a productive package.
 
 ## Installation
 
