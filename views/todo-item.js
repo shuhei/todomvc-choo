@@ -3,9 +3,9 @@ const choo = require('choo')
 const update = (e, todo, send) => send('update', { payload: { id: todo.id, name: e.target.value } })
 
 const handleEditKeydown = (e, todo, send) => {
-  if (e.code === 'Enter') {
+  if (e.keyCode === 13) { // Enter
     update(e, todo, send)
-  } else if (e.code === 'Escape') {
+  } else if (e.code === 27) { // Escape
     send('cancelEditing');
   }
 }

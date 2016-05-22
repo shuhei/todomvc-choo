@@ -2825,7 +2825,7 @@ module.exports = function (params, state, send) {
   return choo.view(_templateObject2, state.name, function (e) {
     return send('updateNew', { payload: e.target.value });
   }, function (e) {
-    return e.code === 'Enter' && send('add') || true;
+    return e.keyCode === 13 && send('add') || true;
   }, state.todos.every(function (todo) {
     return todo.done;
   }), function (e) {
@@ -2851,9 +2851,11 @@ var update = function update(e, todo, send) {
 };
 
 var handleEditKeydown = function handleEditKeydown(e, todo, send) {
-  if (e.code === 'Enter') {
+  if (e.keyCode === 13) {
+    // Enter
     update(e, todo, send);
-  } else if (e.code === 'Escape') {
+  } else if (e.code === 27) {
+    // Escape
     send('cancelEditing');
   }
 };

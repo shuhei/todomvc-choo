@@ -16,7 +16,7 @@ module.exports = (params, state, send) => choo.view`
         placeholder="What needs to be done?"
         value=${state.name}
         oninput=${e => send('updateNew', { payload: e.target.value })}
-        onkeydown=${e => e.code === 'Enter' && send('add') || true}
+        onkeydown=${e => e.keyCode === 13 && send('add') || true}
         autofocus
         />
     </header>
