@@ -8,7 +8,7 @@
     "start": "budo -s dist/index.js --open index.js"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "choo": "^1.3.0",
     "todomvc-app-css": "^2.0.6",
