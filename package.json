@@ -4,8 +4,8 @@
   "description": "A todo app with choo",
   "main": "index.js",
   "scripts": {
-    "compile": "browserify -o dist/index.js index.js",
-    "start": "budo -s dist/index.js --open index.js"
+    "start": "budo index.js --serve=dist/index.js --open -- -t babelify",
+    "compile": "mkdir -p dist && browserify index.js -o dist/index.js -t babelify"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
   "license": "MIT",
@@ -15,6 +15,8 @@
     "todomvc-common": "^1.0.2"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "babelify": "^7.3.0",
     "browserify": "^13.0.1",
     "budo": "^8.2.2"
   }

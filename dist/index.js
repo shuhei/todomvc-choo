@@ -1,37 +1,41 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-const choo = require('choo')
-const mainView = require('./views/main')
+'use strict';
 
-const app = choo()
-app.model(require('./model'))
+var choo = require('choo');
+var mainView = require('./views/main');
 
-app.router((route) => [
-  route('/:filter', mainView)
-])
+var app = choo();
+app.model(require('./model'));
 
-const tree = app.start()
-document.body.appendChild(tree)
+app.router(function (route) {
+  return [route('/:filter', mainView)];
+});
+
+var tree = app.start();
+document.body.appendChild(tree);
 
 },{"./model":2,"./views/main":28,"choo":7}],2:[function(require,module,exports){
-const xtend = require('xtend')
+'use strict';
 
-const STORAGE_ID = 'todos-choo'
-const save = (action, state, send) => {
-  const data = {
+var xtend = require('xtend');
+
+var STORAGE_ID = 'todos-choo';
+var save = function save(action, state, send) {
+  var data = {
     counter: state.counter,
     todos: state.todos
-  }
-  localStorage.setItem(STORAGE_ID, JSON.stringify(data))
-}
+  };
+  localStorage.setItem(STORAGE_ID, JSON.stringify(data));
+};
 
-const init = (send) => {
-  setTimeout(() => {
-    const json = localStorage.getItem(STORAGE_ID)
+var init = function init(send) {
+  setTimeout(function () {
+    var json = localStorage.getItem(STORAGE_ID);
     if (json) {
-      send('init', { payload: JSON.parse(json) })
+      send('init', { payload: JSON.parse(json) });
     }
-  }, 1)
-}
+  }, 1);
+};
 
 module.exports = {
   state: {
@@ -43,45 +47,71 @@ module.exports = {
     todos: []
   },
   reducers: {
-    init: (action, state) => ({ counter: action.payload.counter, todos: action.payload.todos }),
-    updateNew: (action, state) => ({ name: action.payload }),
-    add: (action, state) => ({
-      counter: state.counter + 1,
-      name: '',
-      todos: state.todos.concat({ id: state.counter, name: state.name, done: false })
-    }),
-    toggle: (action, state) => ({
-      todos: state.todos.map(todo => {
-        if (todo.id === action.payload) {
-          return xtend({}, todo, { done: !todo.done })
-        } else {
-          return todo
-        }
-      })
-    }),
-    edit: (action, state) => ({ editing: action.payload }),
-    cancelEditing: (action, state) => ({ editing: null }),
-    update: (action, state) => ({
-      editing: null,
-      todos: state.todos.map(todo => {
-        if (todo.id === action.payload.id) {
-          return xtend({}, todo, { name: action.payload.name })
-        } else {
-          return todo
-        }
-      })
-    }),
-    delete: (action, state) => ({
-      todos: state.todos.filter(todo => todo.id !== action.payload)
-    }),
-    clearCompleted: (action, state) => ({
-      todos: state.todos.filter(todo => !todo.done)
-    }),
-    toggleAll: (action, state) => {
-      const allDone = state.todos.every(todo => todo.done)
+    init: function init(action, state) {
+      return { counter: action.payload.counter, todos: action.payload.todos };
+    },
+    updateNew: function updateNew(action, state) {
+      return { name: action.payload };
+    },
+    add: function add(action, state) {
       return {
-        todos: state.todos.map(todo => xtend({}, todo, { done: !allDone }))
-      }
+        counter: state.counter + 1,
+        name: '',
+        todos: state.todos.concat({ id: state.counter, name: state.name, done: false })
+      };
+    },
+    toggle: function toggle(action, state) {
+      return {
+        todos: state.todos.map(function (todo) {
+          if (todo.id === action.payload) {
+            return xtend({}, todo, { done: !todo.done });
+          } else {
+            return todo;
+          }
+        })
+      };
+    },
+    edit: function edit(action, state) {
+      return { editing: action.payload };
+    },
+    cancelEditing: function cancelEditing(action, state) {
+      return { editing: null };
+    },
+    update: function update(action, state) {
+      return {
+        editing: null,
+        todos: state.todos.map(function (todo) {
+          if (todo.id === action.payload.id) {
+            return xtend({}, todo, { name: action.payload.name });
+          } else {
+            return todo;
+          }
+        })
+      };
+    },
+    delete: function _delete(action, state) {
+      return {
+        todos: state.todos.filter(function (todo) {
+          return todo.id !== action.payload;
+        })
+      };
+    },
+    clearCompleted: function clearCompleted(action, state) {
+      return {
+        todos: state.todos.filter(function (todo) {
+          return !todo.done;
+        })
+      };
+    },
+    toggleAll: function toggleAll(action, state) {
+      var allDone = state.todos.every(function (todo) {
+        return todo.done;
+      });
+      return {
+        todos: state.todos.map(function (todo) {
+          return xtend({}, todo, { done: !allDone });
+        })
+      };
     }
   },
   effects: {
@@ -93,7 +123,7 @@ module.exports = {
     toggleAll: save
   },
   subscriptions: [init]
-}
+};
 
 },{"xtend":24}],3:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -2771,112 +2801,120 @@ module.exports = [
 ]
 
 },{}],28:[function(require,module,exports){
-const choo = require('choo')
-const todoListView = require('./todo-list')
+'use strict';
 
-const clearCompletedButton = (send) => choo.view`
-  <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
-`
+var _templateObject = _taggedTemplateLiteral(['\n  <button class="clear-completed" onclick=', '>Clear completed</button>\n'], ['\n  <button class="clear-completed" onclick=', '>Clear completed</button>\n']),
+    _templateObject2 = _taggedTemplateLiteral(['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        <li><a href="/" class=', '>All</a></li>\n        <li><a href="/active" class=', '>Active</a></li>\n        <li><a href="/completed" class=', '>Completed</a></li>\n      </ul>\n      ', '\n    </footer>\n  </section>\n'], ['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        <li><a href="/" class=', '>All</a></li>\n        <li><a href="/active" class=', '>Active</a></li>\n        <li><a href="/completed" class=', '>Completed</a></li>\n      </ul>\n      ', '\n    </footer>\n  </section>\n']);
 
-const selectedClass = (params, filter) => params.filter === filter ? 'selected' : ''
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-module.exports = (params, state, send) => choo.view`
-  <section class="todoapp">
-    <header class="header">
-      <h1>todos</h1>
-      <input
-        class="new-todo"
-        placeholder="What needs to be done?"
-        value=${state.name}
-        oninput=${e => send('updateNew', { payload: e.target.value })}
-        onkeydown=${e => e.code === 'Enter' && send('add') || true}
-        autofocus
-        />
-    </header>
-    <section class="main">
-      <input
-        class="toggle-all"
-        type="checkbox"
-        checked=${state.todos.every(todo => todo.done)}
-        onchange=${e => send('toggleAll')} />
-      <label for="toggle-all">Mark all as complete</label>
-      ${todoListView(params, state, send)}
-    </section>
-    <footer class="footer">
-      <span class="todo-count">
-        <strong>${state.todos.filter(todo => !todo.done).length}</strong>
-        item${state.todos.length === 1 ? '' : 's'} left
-      </span>
-      <ul class="filters">
-        <li><a href="/" class=${selectedClass(params, '')}>All</a></li>
-        <li><a href="/active" class=${selectedClass(params, 'active')}>Active</a></li>
-        <li><a href="/completed" class=${selectedClass(params, 'completed')}>Completed</a></li>
-      </ul>
-      ${state.todos.some(todo => todo.done) ? clearCompletedButton(send) : ''}
-    </footer>
-  </section>
-`
+var choo = require('choo');
+var todoListView = require('./todo-list');
+
+var clearCompletedButton = function clearCompletedButton(send) {
+  return choo.view(_templateObject, function (e) {
+    return send('clearCompleted');
+  });
+};
+
+var selectedClass = function selectedClass(params, filter) {
+  return params.filter === filter ? 'selected' : '';
+};
+
+module.exports = function (params, state, send) {
+  return choo.view(_templateObject2, state.name, function (e) {
+    return send('updateNew', { payload: e.target.value });
+  }, function (e) {
+    return e.code === 'Enter' && send('add') || true;
+  }, state.todos.every(function (todo) {
+    return todo.done;
+  }), function (e) {
+    return send('toggleAll');
+  }, todoListView(params, state, send), state.todos.filter(function (todo) {
+    return !todo.done;
+  }).length, state.todos.length === 1 ? '' : 's', selectedClass(params, ''), selectedClass(params, 'active'), selectedClass(params, 'completed'), state.todos.some(function (todo) {
+    return todo.done;
+  }) ? clearCompletedButton(send) : '');
+};
 
 },{"./todo-list":30,"choo":7}],29:[function(require,module,exports){
-const choo = require('choo')
+'use strict';
 
-const update = (e, todo, send) => send('update', { payload: { id: todo.id, name: e.target.value } })
+var _templateObject = _taggedTemplateLiteral(['\n  <li class=', '>\n    <div class="view">\n      <input\n        type="checkbox"\n        class="toggle"\n        checked="', '"\n        onchange=', ' />\n      <label ondblclick=', '>', '</label>\n      <button\n        class="destroy"\n        onclick=', '\n        ></button>\n    </div>\n    <input\n      class="edit"\n      value=', '\n      onkeydown=', '\n      onblur=', ' />\n  </li>\n'], ['\n  <li class=', '>\n    <div class="view">\n      <input\n        type="checkbox"\n        class="toggle"\n        checked="', '"\n        onchange=', ' />\n      <label ondblclick=', '>', '</label>\n      <button\n        class="destroy"\n        onclick=', '\n        ></button>\n    </div>\n    <input\n      class="edit"\n      value=', '\n      onkeydown=', '\n      onblur=', ' />\n  </li>\n']);
 
-const handleEditKeydown = (e, todo, send) => {
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var choo = require('choo');
+
+var update = function update(e, todo, send) {
+  return send('update', { payload: { id: todo.id, name: e.target.value } });
+};
+
+var handleEditKeydown = function handleEditKeydown(e, todo, send) {
   if (e.code === 'Enter') {
-    update(e, todo, send)
+    update(e, todo, send);
   } else if (e.code === 'Escape') {
     send('cancelEditing');
   }
-}
+};
 
-const classList =
-  classes => Object.keys(classes).reduce((acc, k) => classes[k] ? acc.push(k) && acc : acc, []).join(' ')
+var classList = function classList(classes) {
+  return Object.keys(classes).reduce(function (acc, k) {
+    return classes[k] ? acc.push(k) && acc : acc;
+  }, []).join(' ');
+};
 
-const todoItemView = (todo, editing, send) => choo.view`
-  <li class=${classList({ completed : todo.done, editing: editing })}>
-    <div class="view">
-      <input
-        type="checkbox"
-        class="toggle"
-        checked="${todo.done}"
-        onchange=${e => send('toggle', { payload: todo.id })} />
-      <label ondblclick=${e => send('edit', { payload: todo.id })}>${todo.name}</label>
-      <button
-        class="destroy"
-        onclick=${e => send('delete', { payload: todo.id })}
-        ></button>
-    </div>
-    <input
-      class="edit"
-      value=${todo.name}
-      onkeydown=${e => handleEditKeydown(e, todo, send)}
-      onblur=${e => update(e, todo, send)} />
-  </li>
-`
+var todoItemView = function todoItemView(todo, editing, send) {
+  return choo.view(_templateObject, classList({ completed: todo.done, editing: editing }), todo.done, function (e) {
+    return send('toggle', { payload: todo.id });
+  }, function (e) {
+    return send('edit', { payload: todo.id });
+  }, todo.name, function (e) {
+    return send('delete', { payload: todo.id });
+  }, todo.name, function (e) {
+    return handleEditKeydown(e, todo, send);
+  }, function (e) {
+    return update(e, todo, send);
+  });
+};
 
-module.exports = todoItemView
+module.exports = todoItemView;
 
 },{"choo":7}],30:[function(require,module,exports){
-const choo = require('choo')
-const todoItemView = require('./todo-item')
+'use strict';
 
-const filterTodos = (todos, filter) => {
+var _templateObject = _taggedTemplateLiteral(['\n  <ul class="todo-list">', '</ul>\n'], ['\n  <ul class="todo-list">', '</ul>\n']);
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var choo = require('choo');
+var todoItemView = require('./todo-item');
+
+var filterTodos = function filterTodos(todos, filter) {
   switch (filter) {
-    case 'active': return todos.filter(todo => !todo.done)
-    case 'completed': return todos.filter(todo => todo.done)
-    default: return todos
+    case 'active':
+      return todos.filter(function (todo) {
+        return !todo.done;
+      });
+    case 'completed':
+      return todos.filter(function (todo) {
+        return todo.done;
+      });
+    default:
+      return todos;
   }
-}
+};
 
-const filteredTodos = (state, filter, send) =>
-  filterTodos(state.todos, filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
+var filteredTodos = function filteredTodos(state, filter, send) {
+  return filterTodos(state.todos, filter).map(function (todo) {
+    return todoItemView(todo, todo.id === state.editing, send);
+  });
+};
 
+var todoListView = function todoListView(params, state, send) {
+  return choo.view(_templateObject, filteredTodos(state, params.filter, send));
+};
 
-const todoListView = (params, state, send) => choo.view`
-  <ul class="todo-list">${filteredTodos(state, params.filter, send)}</ul>
-`
-
-module.exports = todoListView
+module.exports = todoListView;
 
 },{"./todo-item":29,"choo":7}]},{},[1]);
