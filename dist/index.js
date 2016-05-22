@@ -8,7 +8,7 @@ var app = choo();
 app.model(require('./model'));
 
 app.router(function (route) {
-  return [route('/:filter', mainView)];
+  return [route('/', mainView)];
 });
 
 var tree = app.start();
@@ -42,6 +42,7 @@ module.exports = {
     // UI state
     editing: null,
     name: '',
+    filter: '',
     // real state
     counter: 0,
     todos: []
@@ -112,6 +113,9 @@ module.exports = {
           return xtend({}, todo, { done: !allDone });
         })
       };
+    },
+    filter: function filter(action, state) {
+      return { filter: action.payload };
     }
   },
   effects: {
@@ -2804,7 +2808,8 @@ module.exports = [
 'use strict';
 
 var _templateObject = _taggedTemplateLiteral(['\n  <button class="clear-completed" onclick=', '>Clear completed</button>\n'], ['\n  <button class="clear-completed" onclick=', '>Clear completed</button>\n']),
-    _templateObject2 = _taggedTemplateLiteral(['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        <li><a href="/" class=', '>All</a></li>\n        <li><a href="/active" class=', '>Active</a></li>\n        <li><a href="/completed" class=', '>Completed</a></li>\n      </ul>\n      ', '\n    </footer>\n  </section>\n'], ['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        <li><a href="/" class=', '>All</a></li>\n        <li><a href="/active" class=', '>Active</a></li>\n        <li><a href="/completed" class=', '>Completed</a></li>\n      </ul>\n      ', '\n    </footer>\n  </section>\n']);
+    _templateObject2 = _taggedTemplateLiteral(['\n  <li><a href="#" onclick=', ' class=', '>', '</a></li>\n'], ['\n  <li><a href="#" onclick=', ' class=', '>', '</a></li>\n']),
+    _templateObject3 = _taggedTemplateLiteral(['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        ', '\n        ', '\n        ', '\n      </ul>\n      ', '\n    </footer>\n  </section>\n'], ['\n  <section class="todoapp">\n    <header class="header">\n      <h1>todos</h1>\n      <input\n        class="new-todo"\n        placeholder="What needs to be done?"\n        value=', '\n        oninput=', '\n        onkeydown=', '\n        autofocus\n        />\n    </header>\n    <section class="main">\n      <input\n        class="toggle-all"\n        type="checkbox"\n        checked=', '\n        onchange=', ' />\n      <label for="toggle-all">Mark all as complete</label>\n      ', '\n    </section>\n    <footer class="footer">\n      <span class="todo-count">\n        <strong>', '</strong>\n        item', ' left\n      </span>\n      <ul class="filters">\n        ', '\n        ', '\n        ', '\n      </ul>\n      ', '\n    </footer>\n  </section>\n']);
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
@@ -2817,12 +2822,18 @@ var clearCompletedButton = function clearCompletedButton(send) {
   });
 };
 
-var selectedClass = function selectedClass(params, filter) {
-  return params.filter === filter ? 'selected' : '';
+var selectedClass = function selectedClass(state, filter) {
+  return state.filter === filter ? 'selected' : '';
+};
+
+var filterButton = function filterButton(name, filter, state, send) {
+  return choo.view(_templateObject2, function (e) {
+    return send('filter', { payload: filter });
+  }, selectedClass(state, filter), name);
 };
 
 module.exports = function (params, state, send) {
-  return choo.view(_templateObject2, state.name, function (e) {
+  return choo.view(_templateObject3, state.name, function (e) {
     return send('updateNew', { payload: e.target.value });
   }, function (e) {
     return e.keyCode === 13 && send('add') || true;
@@ -2830,9 +2841,9 @@ module.exports = function (params, state, send) {
     return todo.done;
   }), function (e) {
     return send('toggleAll');
-  }, todoListView(params, state, send), state.todos.filter(function (todo) {
+  }, todoListView(state, send), state.todos.filter(function (todo) {
     return !todo.done;
-  }).length, state.todos.length === 1 ? '' : 's', selectedClass(params, ''), selectedClass(params, 'active'), selectedClass(params, 'completed'), state.todos.some(function (todo) {
+  }).length, state.todos.length === 1 ? '' : 's', filterButton('All', '', state, send), filterButton('Active', 'active', state, send), filterButton('Completed', 'completed', state, send), state.todos.some(function (todo) {
     return todo.done;
   }) ? clearCompletedButton(send) : '');
 };
@@ -2907,14 +2918,14 @@ var filterTodos = function filterTodos(todos, filter) {
   }
 };
 
-var filteredTodos = function filteredTodos(state, filter, send) {
-  return filterTodos(state.todos, filter).map(function (todo) {
+var filteredTodos = function filteredTodos(state, send) {
+  return filterTodos(state.todos, state.filter).map(function (todo) {
     return todoItemView(todo, todo.id === state.editing, send);
   });
 };
 
-var todoListView = function todoListView(params, state, send) {
-  return choo.view(_templateObject, filteredTodos(state, params.filter, send));
+var todoListView = function todoListView(state, send) {
+  return choo.view(_templateObject, filteredTodos(state, send));
 };
 
 module.exports = todoListView;

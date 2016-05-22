@@ -5,7 +5,11 @@ const clearCompletedButton = (send) => choo.view`
   <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
 `
 
-const selectedClass = (params, filter) => params.filter === filter ? 'selected' : ''
+const selectedClass = (state, filter) => state.filter === filter ? 'selected' : ''
+
+const filterButton = (name, filter, state, send) => choo.view`
+  <li><a href="#" onclick=${e => send('filter', { payload: filter })} class=${selectedClass(state, filter)}>${name}</a></li>
+`
 
 module.exports = (params, state, send) => choo.view`
   <section class="todoapp">
@@ -27,7 +31,7 @@ module.exports = (params, state, send) => choo.view`
         checked=${state.todos.every(todo => todo.done)}
         onchange=${e => send('toggleAll')} />
       <label for="toggle-all">Mark all as complete</label>
-      ${todoListView(params, state, send)}
+      ${todoListView(state, send)}
     </section>
     <footer class="footer">
       <span class="todo-count">
@@ -35,9 +39,9 @@ module.exports = (params, state, send) => choo.view`
         item${state.todos.length === 1 ? '' : 's'} left
       </span>
       <ul class="filters">
-        <li><a href="/" class=${selectedClass(params, '')}>All</a></li>
-        <li><a href="/active" class=${selectedClass(params, 'active')}>Active</a></li>
-        <li><a href="/completed" class=${selectedClass(params, 'completed')}>Completed</a></li>
+        ${filterButton('All', '', state, send)}
+        ${filterButton('Active', 'active', state, send)}
+        ${filterButton('Completed', 'completed', state, send)}
       </ul>
       ${state.todos.some(todo => todo.done) ? clearCompletedButton(send) : ''}
     </footer>

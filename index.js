@@ -5,7 +5,7 @@ const app = choo()
 app.model(require('./model'))
 
 app.router((route) => [
-  route('/:filter', mainView)
+  route('/', mainView)
 ])
 
 const tree = app.start()

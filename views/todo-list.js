@@ -9,12 +9,11 @@ const filterTodos = (todos, filter) => {
   }
 }
 
-const filteredTodos = (state, filter, send) =>
-  filterTodos(state.todos, filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
+const filteredTodos = (state, send) =>
+  filterTodos(state.todos, state.filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
 
-
-const todoListView = (params, state, send) => choo.view`
-  <ul class="todo-list">${filteredTodos(state, params.filter, send)}</ul>
+const todoListView = (state, send) => choo.view`
+  <ul class="todo-list">${filteredTodos(state, send)}</ul>
 `
 
 module.exports = todoListView

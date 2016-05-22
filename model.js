@@ -23,6 +23,7 @@ module.exports = {
     // UI state
     editing: null,
     name: '',
+    filter: '',
     // real state
     counter: 0,
     todos: []
@@ -67,7 +68,8 @@ module.exports = {
       return {
         todos: state.todos.map(todo => xtend({}, todo, { done: !allDone }))
       }
-    }
+    },
+    filter: (action, state) => ({ filter: action.payload })
   },
   effects: {
     add: save,
