@@ -12,14 +12,14 @@
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "choo": "^1.3.0",
+    "choo": "^3.3.0",
     "todomvc-app-css": "^2.0.6",
     "todomvc-common": "^1.0.2"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015": "^6.16.0",
     "babelify": "^7.3.0",
-    "browserify": "^13.0.1",
-    "budo": "^8.2.2"
+    "browserify": "^13.1.0",
+    "budo": "^9.2.1"
   }
 }

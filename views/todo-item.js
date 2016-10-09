@@ -1,4 +1,5 @@
 const choo = require('choo')
+const html = require('choo/html')
 
 const update = (e, todo, send) => send('update', { payload: { id: todo.id, name: e.target.value } })
 
@@ -13,7 +14,7 @@ const handleEditKeydown = (e, todo, send) => {
 const classList =
   classes => Object.keys(classes).reduce((acc, k) => classes[k] ? acc.push(k) && acc : acc, []).join(' ')
 
-const todoItemView = (todo, editing, send) => choo.view`
+const todoItemView = (todo, editing, send) => html`
   <li class=${classList({ completed : todo.done, editing: editing })}>
     <div class="view">
       <input

@@ -1,17 +1,18 @@
 const choo = require('choo')
+const html = require('choo/html')
 const todoListView = require('./todo-list')
 
-const clearCompletedButton = (send) => choo.view`
+const clearCompletedButton = (send) => html`
   <button class="clear-completed" onclick=${e => send('clearCompleted')}>Clear completed</button>
 `
 
 const selectedClass = (state, filter) => state.filter === filter ? 'selected' : ''
 
-const filterButton = (name, filter, state, send) => choo.view`
+const filterButton = (name, filter, state, send) => html`
   <li><a href="#" onclick=${e => send('filter', { payload: filter })} class=${selectedClass(state, filter)}>${name}</a></li>
 `
 
-module.exports = (params, state, send) => choo.view`
+module.exports = (state, prev, send) => html`
   <section class="todoapp">
     <header class="header">
       <h1>todos</h1>
@@ -31,7 +32,7 @@ module.exports = (params, state, send) => choo.view`
         checked=${state.todos.every(todo => todo.done)}
         onchange=${e => send('toggleAll')} />
       <label for="toggle-all">Mark all as complete</label>
-      ${todoListView(state, send)}
+      ${todoListView(state, prev, send)}
     </section>
     <footer class="footer">
       <span class="todo-count">
