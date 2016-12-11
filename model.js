@@ -1,22 +1,42 @@
 const xtend = require('xtend')
 
 const STORAGE_ID = 'todos-choo'
-const save = (action, state, send) => {
-  const data = {
-    counter: state.counter,
-    todos: state.todos
+const keysToSave = ['counter', 'todos']
+
+const getState = () => {
+  const json = localStorage.getItem(STORAGE_ID)
+  if (json) {
+    return JSON.parse(json)
+  } else {
+    return null;
   }
-  localStorage.setItem(STORAGE_ID, JSON.stringify(data))
 }
 
-const init = (send) => {
-  setTimeout(() => {
-    const json = localStorage.getItem(STORAGE_ID)
-    if (json) {
-      send('init', { payload: JSON.parse(json) })
-    }
-  }, 1)
+const saveState = (state) => {
+  localStorage.setItem(STORAGE_ID, JSON.stringify(state))
 }
+
+const init = (send, done) => {
+  try {
+    const state = getState()
+    if (state) {
+      send('init', { payload: state }, done)
+    } else {
+      done()
+    }
+  } catch (e) {
+    done(e)
+  }
+}
+
+const equalProps = (keys, state, prev) => keys.reduce(
+  (acc, key) => acc && state[key] === prev[key],
+  true
+)
+const pick = (keys, state) => keys.reduce((acc, key) => {
+  acc[key] = state[key]
+  return acc
+}, {})
 
 module.exports = {
   state: {
@@ -71,13 +91,13 @@ module.exports = {
     },
     filter: (action, state) => ({ filter: action.payload })
   },
-  effects: {
-    add: save,
-    toggle: save,
-    update: save,
-    delete: save,
-    clearCompleted: save,
-    toggleAll: save
-  },
-  subscriptions: [init]
+
+  subscriptions: [init],
+
+  // This is not for the model. But I put this here to colocate it with other model functions.
+  onStateChange: (data, state, prev, caller, createSend) => {
+    if (!equalProps(keysToSave, state, prev)) {
+      saveState(pick(keysToSave, state))
+    }
+  }
 }
