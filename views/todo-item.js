@@ -1,38 +1,71 @@
-const html = require('choo/html')
+var html = require('choo/html')
 
-const update = (e, todo, send) => send('todos:update', { payload: { id: todo.id, name: e.target.value } })
+module.exports = function todoItemView (todo, editing, send) {
+  return html`
+    <li class=${classList({ completed: todo.done, editing: editing })}>
+      <div class="view">
+        <input
+          type="checkbox"
+          class="toggle"
+          checked="${todo.done}"
+          onchange=${toggle(todo, send)}
+        />
+        <label ondblclick=${edit(todo, send)}>${todo.name}</label>
+        <button
+          class="destroy"
+          onclick=${destroy(todo, send)}
+        ></button>
+      </div>
+      <input
+        class="edit"
+        value=${todo.name}
+        onkeydown=${handleEditKeydown(todo, send)}
+        onblur=${update(todo, send)}
+      />
+    </li>
+  `
+}
 
-const handleEditKeydown = (e, todo, send) => {
-  if (e.keyCode === 13) { // Enter
-    update(e, todo, send)
-  } else if (e.code === 27) { // Escape
-    send('todos:cancelEditing')
+function toggle (todo, send) {
+  return function (e) {
+    send('todos:toggle', { payload: todo.id })
   }
 }
 
-const classList =
-  classes => Object.keys(classes).reduce((acc, k) => classes[k] ? acc.push(k) && acc : acc, []).join(' ')
+function edit (todo, send) {
+  return function (e) {
+    send('todos:edit', { payload: todo.id })
+  }
+}
 
-const todoItemView = (todo, editing, send) => html`
-  <li class=${classList({ completed: todo.done, editing: editing })}>
-    <div class="view">
-      <input
-        type="checkbox"
-        class="toggle"
-        checked="${todo.done}"
-        onchange=${e => send('todos:toggle', { payload: todo.id })} />
-      <label ondblclick=${e => send('todos:edit', { payload: todo.id })}>${todo.name}</label>
-      <button
-        class="destroy"
-        onclick=${e => send('todos:delete', { payload: todo.id })}
-        ></button>
-    </div>
-    <input
-      class="edit"
-      value=${todo.name}
-      onkeydown=${e => handleEditKeydown(e, todo, send)}
-      onblur=${e => update(e, todo, send)} />
-  </li>
-`
+function destroy (todo, send) {
+  return function (e) {
+    send('todos:delete', { payload: todo.id })
+  }
+}
 
-module.exports = todoItemView
+function update (todo, send) {
+  return function (e) {
+    var payload = { id: todo.id, name: e.target.value }
+    send('todos:update', { payload: payload })
+  }
+}
+
+function handleEditKeydown (todo, send) {
+  return function (e) {
+    if (e.keyCode === 13) { // Enter
+      update(todo, send)(e)
+    } else if (e.code === 27) { // Escape
+      send('todos:cancelEditing')
+    }
+  }
+}
+
+function classList (classes) {
+  return Object.keys(classes).reduce(function (acc, k) {
+    if (classes[k]) {
+      acc.push(k)
+    }
+    return acc
+  }, []).join(' ')
+}

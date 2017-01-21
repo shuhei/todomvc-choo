@@ -1,7 +1,7 @@
-const xtend = require('xtend')
+var xtend = require('xtend')
 
-const STORAGE_ID = 'todos-choo'
-const keysToSave = ['counter', 'items']
+var STORAGE_ID = 'todos-choo'
+var keysToSave = ['counter', 'items']
 
 module.exports = {
   namespace: 'todos',
@@ -36,7 +36,7 @@ module.exports = {
 }
 
 function getState () {
-  const json = window.localStorage.getItem(STORAGE_ID)
+  var json = window.localStorage.getItem(STORAGE_ID)
   if (json) {
     return JSON.parse(json)
   } else {
@@ -50,7 +50,7 @@ function saveState (state) {
 
 function initModel (send, done) {
   try {
-    const state = getState()
+    var state = getState()
     if (state) {
       send('todos:init', { payload: state }, done)
     } else {
@@ -142,7 +142,7 @@ function clearCompleted (state, action) {
 }
 
 function toggleAll (state, action) {
-  const allDone = state.items.every(function (todo) {
+  var allDone = state.items.every(function (todo) {
     return todo.done
   })
   return {

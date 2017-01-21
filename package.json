@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "bankai index.js",
-    "build": "bankai build index.js dist && node render.js > dist/index.html",
+    "build": "bankai build -O index.js dist && node render.js > dist/index.html",
     "deploy": "gh-pages -d dist"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",

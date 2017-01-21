@@ -1,24 +1,44 @@
-const html = require('choo/html')
-const todoItemView = require('./todo-item')
+var html = require('choo/html')
+var todoItemView = require('./todo-item')
+
+module.exports = function todoListView (todos, prev, send) {
+  var items = filterTodos(todos.items, todos.filter)
+  var views = items.map(function (todo) {
+    return todoItemView(todo, todo.id === todos.editing, send)
+  })
+
+  return html`
+    <section class="main">
+      <input
+        class="toggle-all"
+        type="checkbox"
+        checked=${todos.items.every(isDone)}
+        onchange=${toggleAll(send)}
+      />
+      <label for="toggle-all" style="display: none;">Mark all as complete</label>
+      <ul class="todo-list">${views}</ul>
+    </section>
+  `
+}
+
+function toggleAll (send) {
+  return function () {
+    send('todos:toggleAll')
+  }
+}
 
 function filterTodos (items, filter) {
   switch (filter) {
-    case 'active': return items.filter(todo => !todo.done)
-    case 'completed': return items.filter(todo => todo.done)
+    case 'active': return items.filter(isNotDone)
+    case 'completed': return items.filter(isDone)
     default: return items
   }
 }
 
-function filteredTodos (state, prev, send) {
-  return filterTodos(state.items, state.filter).map(function (todo) {
-    return todoItemView(todo, todo.id === state.editing, send)
-  })
+function isDone (todo) {
+  return todo.done
 }
 
-function todoListView (state, prev, send) {
-  return html`
-    <ul class="todo-list">${filteredTodos(state, prev, send)}</ul>
-  `
+function isNotDone (todo) {
+  return !todo.done
 }
-
-module.exports = todoListView
