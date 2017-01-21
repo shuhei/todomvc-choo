@@ -1,18 +1,17 @@
-const choo = require('choo')
 const html = require('choo/html')
 const todoListView = require('./todo-list')
 
-function clearCompletedButton(send) {
+function clearCompletedButton (send) {
   return html`
     <button class="clear-completed" onclick=${e => send('todos:clearCompleted')}>Clear completed</button>
   `
 }
 
-function selectedClass(state, filter) {
+function selectedClass (state, filter) {
   return state.filter === filter ? 'selected' : ''
 }
 
-function filterButton(name, filter, state, send) {
+function filterButton (name, filter, state, send) {
   return html`
     <li><a href="#" onclick=${e => send('todos:filter', { payload: filter })} class=${selectedClass(state, filter)}>${name}</a></li>
   `

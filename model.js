@@ -35,8 +35,8 @@ module.exports = {
   onStateChange: onStateChange
 }
 
-function getState() {
-  const json = localStorage.getItem(STORAGE_ID)
+function getState () {
+  const json = window.localStorage.getItem(STORAGE_ID)
   if (json) {
     return JSON.parse(json)
   } else {
@@ -44,11 +44,11 @@ function getState() {
   }
 }
 
-function saveState(state) {
-  localStorage.setItem(STORAGE_ID, JSON.stringify(state))
+function saveState (state) {
+  window.localStorage.setItem(STORAGE_ID, JSON.stringify(state))
 }
 
-function initModel(send, done) {
+function initModel (send, done) {
   try {
     const state = getState()
     if (state) {
@@ -61,13 +61,13 @@ function initModel(send, done) {
   }
 }
 
-function equalProps(keys, state, prev) {
+function equalProps (keys, state, prev) {
   return keys.reduce(function (acc, key) {
     return acc && state[key] === prev[key]
   }, true)
 }
 
-function pick(keys, state) {
+function pick (keys, state) {
   return keys.reduce(function (acc, key) {
     acc[key] = state[key]
     return acc
@@ -76,23 +76,23 @@ function pick(keys, state) {
 
 // Reducers
 
-function init(state, action) {
+function init (state, action) {
   return { counter: action.payload.counter, items: action.payload.items }
 }
 
-function updateNew(state, action) {
+function updateNew (state, action) {
   return { name: action.payload }
 }
 
-function add(state, action) {
+function add (state, action) {
   return {
     counter: state.counter + 1,
     name: '',
     items: state.items.concat({ id: state.counter, name: state.name, done: false })
-  };
+  }
 }
 
-function toggle(state, action) {
+function toggle (state, action) {
   return {
     items: state.items.map(function (todo) {
       if (todo.id === action.payload) {
@@ -104,15 +104,15 @@ function toggle(state, action) {
   }
 }
 
-function edit(state, action) {
+function edit (state, action) {
   return { editing: action.payload }
 }
 
-function cancelEditing(state, action) {
+function cancelEditing (state, action) {
   return { editing: null }
 }
 
-function update(state, action) {
+function update (state, action) {
   return {
     editing: null,
     items: state.items.map(function (todo) {
@@ -125,7 +125,7 @@ function update(state, action) {
   }
 }
 
-function deleteItem(state, action) {
+function deleteItem (state, action) {
   return {
     items: state.items.filter(function (todo) {
       return todo.id !== action.payload
@@ -133,7 +133,7 @@ function deleteItem(state, action) {
   }
 }
 
-function clearCompleted(state, action) {
+function clearCompleted (state, action) {
   return {
     items: state.items.filter(function (todo) {
       return !todo.done
@@ -141,7 +141,7 @@ function clearCompleted(state, action) {
   }
 }
 
-function toggleAll(state, action) {
+function toggleAll (state, action) {
   const allDone = state.items.every(function (todo) {
     return todo.done
   })
@@ -152,11 +152,11 @@ function toggleAll(state, action) {
   }
 }
 
-function filter(state, action) {
+function filter (state, action) {
   return { filter: action.payload }
 }
 
-function onStateChange(state, data, prev, caller, createSend) {
+function onStateChange (state, data, prev, caller, createSend) {
   if (prev && prev.todos && !equalProps(keysToSave, state.todos, prev.todos)) {
     saveState(pick(keysToSave, state.todos))
   }

@@ -1,4 +1,3 @@
-var path = require('path')
 var hyperstream = require('hyperstream')
 var createHtml = require('create-html')
 var stream = require('stream')
@@ -8,7 +7,7 @@ var base = {
   title: 'choo • TodoMVC',
   script: 'bundle.js',
   css: 'bundle.css',
-  head: '<meta name="viewport" content="width=device-width, initial-scale=1">',
+  head: '<meta name="viewport" content="width=device-width, initial-scale=1">'
 }
 var hs = hyperstream({
   body: {
@@ -16,7 +15,7 @@ var hs = hyperstream({
   }
 })
 
-var pass = new stream.PassThrough();
+var pass = new stream.PassThrough()
 pass.end(createHtml(base))
 
 pass.pipe(hs).pipe(process.stdout)
