@@ -2,19 +2,24 @@ const choo = require('choo')
 const html = require('choo/html')
 const todoItemView = require('./todo-item')
 
-const filterTodos = (todos, filter) => {
+function filterTodos(items, filter) {
   switch (filter) {
-    case 'active': return todos.filter(todo => !todo.done)
-    case 'completed': return todos.filter(todo => todo.done)
-    default: return todos
+    case 'active': return items.filter(todo => !todo.done)
+    case 'completed': return items.filter(todo => todo.done)
+    default: return items
   }
 }
 
-const filteredTodos = (state, prev, send) =>
-  filterTodos(state.todos, state.filter).map(todo => todoItemView(todo, todo.id === state.editing, send))
+function filteredTodos(state, prev, send) {
+  return filterTodos(state.items, state.filter).map(function (todo) {
+    return todoItemView(todo, todo.id === state.editing, send)
+  })
+}
 
-const todoListView = (state, prev, send) => html`
-  <ul class="todo-list">${filteredTodos(state, prev, send)}</ul>
-`
+function todoListView(state, prev, send) {
+  return html`
+    <ul class="todo-list">${filteredTodos(state, prev, send)}</ul>
+  `
+}
 
 module.exports = todoListView

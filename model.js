@@ -1,26 +1,58 @@
 const xtend = require('xtend')
 
 const STORAGE_ID = 'todos-choo'
-const keysToSave = ['counter', 'todos']
+const keysToSave = ['counter', 'items']
 
-const getState = () => {
+module.exports = {
+  namespace: 'todos',
+  state: {
+    // UI state
+    editing: null,
+    name: '',
+    filter: '',
+    // real state
+    counter: 0,
+    items: []
+  },
+  reducers: {
+    init: init,
+    updateNew: updateNew,
+    add: add,
+    toggle: toggle,
+    edit: edit,
+    cancelEditing: cancelEditing,
+    update: update,
+    delete: deleteItem,
+    clearCompleted: clearCompleted,
+    toggleAll: toggleAll,
+    filter: filter
+  },
+  subscriptions: {
+    init: initModel
+  },
+
+  // This is not for the model. But I put this here to colocate it with other model functions.
+  onStateChange: onStateChange
+}
+
+function getState() {
   const json = localStorage.getItem(STORAGE_ID)
   if (json) {
     return JSON.parse(json)
   } else {
-    return null;
+    return null
   }
 }
 
-const saveState = (state) => {
+function saveState(state) {
   localStorage.setItem(STORAGE_ID, JSON.stringify(state))
 }
 
-const init = (send, done) => {
+function initModel(send, done) {
   try {
     const state = getState()
     if (state) {
-      send('init', { payload: state }, done)
+      send('todos:init', { payload: state }, done)
     } else {
       done()
     }
@@ -29,75 +61,103 @@ const init = (send, done) => {
   }
 }
 
-const equalProps = (keys, state, prev) => keys.reduce(
-  (acc, key) => acc && state[key] === prev[key],
-  true
-)
-const pick = (keys, state) => keys.reduce((acc, key) => {
-  acc[key] = state[key]
-  return acc
-}, {})
+function equalProps(keys, state, prev) {
+  return keys.reduce(function (acc, key) {
+    return acc && state[key] === prev[key]
+  }, true)
+}
 
-module.exports = {
-  state: {
-    // UI state
-    editing: null,
+function pick(keys, state) {
+  return keys.reduce(function (acc, key) {
+    acc[key] = state[key]
+    return acc
+  }, {})
+}
+
+// Reducers
+
+function init(state, action) {
+  return { counter: action.payload.counter, items: action.payload.items }
+}
+
+function updateNew(state, action) {
+  return { name: action.payload }
+}
+
+function add(state, action) {
+  return {
+    counter: state.counter + 1,
     name: '',
-    filter: '',
-    // real state
-    counter: 0,
-    todos: []
-  },
-  reducers: {
-    init: (action, state) => ({ counter: action.payload.counter, todos: action.payload.todos }),
-    updateNew: (action, state) => ({ name: action.payload }),
-    add: (action, state) => ({
-      counter: state.counter + 1,
-      name: '',
-      todos: state.todos.concat({ id: state.counter, name: state.name, done: false })
-    }),
-    toggle: (action, state) => ({
-      todos: state.todos.map(todo => {
-        if (todo.id === action.payload) {
-          return xtend({}, todo, { done: !todo.done })
-        } else {
-          return todo
-        }
-      })
-    }),
-    edit: (action, state) => ({ editing: action.payload }),
-    cancelEditing: (action, state) => ({ editing: null }),
-    update: (action, state) => ({
-      editing: null,
-      todos: state.todos.map(todo => {
-        if (todo.id === action.payload.id) {
-          return xtend({}, todo, { name: action.payload.name })
-        } else {
-          return todo
-        }
-      })
-    }),
-    delete: (action, state) => ({
-      todos: state.todos.filter(todo => todo.id !== action.payload)
-    }),
-    clearCompleted: (action, state) => ({
-      todos: state.todos.filter(todo => !todo.done)
-    }),
-    toggleAll: (action, state) => {
-      const allDone = state.todos.every(todo => todo.done)
-      return {
-        todos: state.todos.map(todo => xtend({}, todo, { done: !allDone }))
+    items: state.items.concat({ id: state.counter, name: state.name, done: false })
+  };
+}
+
+function toggle(state, action) {
+  return {
+    items: state.items.map(function (todo) {
+      if (todo.id === action.payload) {
+        return xtend({}, todo, { done: !todo.done })
+      } else {
+        return todo
       }
-    },
-    filter: (action, state) => ({ filter: action.payload })
-  },
+    })
+  }
+}
 
-  subscriptions: [init],
+function edit(state, action) {
+  return { editing: action.payload }
+}
 
-  // This is not for the model. But I put this here to colocate it with other model functions.
-  onStateChange: (data, state, prev, caller, createSend) => {
-    if (!equalProps(keysToSave, state, prev)) {
-      saveState(pick(keysToSave, state))
-    }
+function cancelEditing(state, action) {
+  return { editing: null }
+}
+
+function update(state, action) {
+  return {
+    editing: null,
+    items: state.items.map(function (todo) {
+      if (todo.id === action.payload.id) {
+        return xtend({}, todo, { name: action.payload.name })
+      } else {
+        return todo
+      }
+    })
+  }
+}
+
+function deleteItem(state, action) {
+  return {
+    items: state.items.filter(function (todo) {
+      return todo.id !== action.payload
+    })
+  }
+}
+
+function clearCompleted(state, action) {
+  return {
+    items: state.items.filter(function (todo) {
+      return !todo.done
+    })
+  }
+}
+
+function toggleAll(state, action) {
+  const allDone = state.items.every(function (todo) {
+    return todo.done
+  })
+  return {
+    items: state.items.map(function (todo) {
+      return xtend({}, todo, { done: !allDone })
+    })
+  }
+}
+
+function filter(state, action) {
+  return { filter: action.payload }
+}
+
+function onStateChange(state, data, prev, caller, createSend) {
+  if (prev && prev.todos && !equalProps(keysToSave, state.todos, prev.todos)) {
+    saveState(pick(keysToSave, state.todos))
   }
 }
