@@ -4,22 +4,30 @@
 >
 >A framework for creating sturdy web applications. Built on years of industry experience it distills the essence of functional architectures into a productive package.
 
-## Installation
+## Development
+
+Install:
 
 ```
 npm install
 ```
 
-## Development
+Run a dev server:
 
 ```
 npm start
 ```
 
-## Compiling
+Build assets to `dist`:
 
 ```
-npm run compile
+npm run build
+```
+
+Deploy `dist` to GitHub Pages:
+
+```
+npm run deploy
 ```
 
 ## Credit
