@@ -10,8 +10,8 @@ var model = require('./model')
 var app = choo()
 app.model(model)
 
-var isProduction = typeof location !== 'undefined' && location.host.indexOf('localhost') !== 0
-var prefix = isProduction ? '/todomvc-choo' : ''
+var onWebsite = typeof location !== 'undefined' && location.host.indexOf('localhost') !== 0
+var prefix = onWebsite ? '/todomvc-choo' : ''
 app.router([
   [prefix + '/', mainView]
 ])
@@ -1387,6 +1387,7 @@ function choo (opts) {
   start.router = router
   start.model = model
   start.start = start
+  start.stop = _store.stop
   start.use = use
 
   return start
