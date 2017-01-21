@@ -10,8 +10,10 @@ var model = require('./model')
 var app = choo()
 app.model(model)
 
+var isProduction = typeof location !== 'undefined' && location.host.indexOf('localhost') !== 0
+var prefix = isProduction ? '/todomvc-choo' : ''
 app.router([
-  ['/', mainView]
+  [prefix + '/', mainView]
 ])
 
 app.use({
@@ -160,20 +162,28 @@ function update(state, action) {
 
 function deleteItem(state, action) {
   return {
-    items: state.items.filter(todo => todo.id !== action.payload)
+    items: state.items.filter(function (todo) {
+      return todo.id !== action.payload
+    })
   }
 }
 
 function clearCompleted(state, action) {
   return {
-    items: state.items.filter(todo => !todo.done)
+    items: state.items.filter(function (todo) {
+      return !todo.done
+    })
   }
 }
 
 function toggleAll(state, action) {
-  const allDone = state.items.every(todo => todo.done)
+  const allDone = state.items.every(function (todo) {
+    return todo.done
+  })
   return {
-    items: state.items.map(todo => xtend({}, todo, { done: !allDone }))
+    items: state.items.map(function (todo) {
+      return xtend({}, todo, { done: !allDone })
+    })
   }
 }
 
@@ -4039,15 +4049,21 @@ const choo = require('choo')
 const html = require('choo/html')
 const todoListView = require('./todo-list')
 
-const clearCompletedButton = (send) => html`
-  <button class="clear-completed" onclick=${e => send('todos:clearCompleted')}>Clear completed</button>
-`
+function clearCompletedButton(send) {
+  return html`
+    <button class="clear-completed" onclick=${e => send('todos:clearCompleted')}>Clear completed</button>
+  `
+}
 
-const selectedClass = (state, filter) => state.filter === filter ? 'selected' : ''
+function selectedClass(state, filter) {
+  return state.filter === filter ? 'selected' : ''
+}
 
-const filterButton = (name, filter, state, send) => html`
-  <li><a href="#" onclick=${e => send('todos:filter', { payload: filter })} class=${selectedClass(state, filter)}>${name}</a></li>
-`
+function filterButton(name, filter, state, send) {
+  return html`
+    <li><a href="#" onclick=${e => send('todos:filter', { payload: filter })} class=${selectedClass(state, filter)}>${name}</a></li>
+  `
+}
 
 module.exports = function (state, prev, send) {
   var todos = state.todos
