@@ -9,10 +9,9 @@ css('todomvc-app-css/index.css')
 var app = choo()
 app.model(model)
 
-var onWebsite = typeof window === 'object' && window.location.host.indexOf('localhost') !== 0
-var prefix = onWebsite ? '/todomvc-choo' : ''
+var route = typeof window === 'object' ? window.location.pathname : '/'
 app.router([
-  [prefix + '/', mainView]
+  [route, mainView]
 ])
 
 app.use({
