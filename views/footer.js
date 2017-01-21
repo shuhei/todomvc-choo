@@ -56,6 +56,7 @@ function selectedClass (selectedFilter, filter) {
 function applyFilter (filter, send) {
   return function (e) {
     send('todos:filter', { payload: filter })
+    e.preventDefault()
   }
 }
 

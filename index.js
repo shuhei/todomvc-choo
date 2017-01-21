@@ -9,9 +9,10 @@ css('todomvc-app-css/index.css')
 var app = choo()
 app.model(model)
 
-var route = typeof window === 'object' ? window.location.pathname.replace(/\/$/, '') : '/'
+var route = typeof window === 'object' ? window.location.pathname : '/'
 app.router([
-  [route, mainView]
+  [route, mainView],
+  [route + '/', mainView]
 ])
 
 app.use({
