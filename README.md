@@ -18,16 +18,10 @@ Run a dev server:
 npm start
 ```
 
-Build assets to `dist`:
+Build assets into `dist`:
 
 ```
 npm run build
-```
-
-Deploy `dist` to GitHub Pages:
-
-```
-npm run deploy
 ```
 
 ## Credit

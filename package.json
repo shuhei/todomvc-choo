@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "bankai index.js",
-    "build": "bankai build -O index.js dist && node render.js > dist/index.html",
-    "deploy": "gh-pages -d dist"
+    "build": "bankai build -O index.js dist && node render.js > dist/index.html"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
   "license": "MIT",
@@ -19,7 +18,6 @@
   "devDependencies": {
     "bankai": "^5.2.1",
     "create-html": "^1.1.0",
-    "gh-pages": "^0.12.0",
     "hyperstream": "^1.2.2"
   }
 }
