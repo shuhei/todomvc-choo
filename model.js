@@ -1,8 +1,5 @@
 var xtend = require('xtend')
 
-var STORAGE_ID = 'todos-choo'
-var keysToSave = ['counter', 'items']
-
 module.exports = {
   namespace: 'todos',
   state: {
@@ -33,45 +30,6 @@ module.exports = {
 
   // This is not for the model. But I put this here to colocate it with other model functions.
   onStateChange: onStateChange
-}
-
-function getState () {
-  var json = window.localStorage.getItem(STORAGE_ID)
-  if (json) {
-    return JSON.parse(json)
-  } else {
-    return null
-  }
-}
-
-function saveState (state) {
-  window.localStorage.setItem(STORAGE_ID, JSON.stringify(state))
-}
-
-function initModel (send, done) {
-  try {
-    var state = getState()
-    if (state) {
-      send('todos:init', { payload: state }, done)
-    } else {
-      done()
-    }
-  } catch (e) {
-    done(e)
-  }
-}
-
-function equalProps (keys, state, prev) {
-  return keys.reduce(function (acc, key) {
-    return acc && state[key] === prev[key]
-  }, true)
-}
-
-function pick (keys, state) {
-  return keys.reduce(function (acc, key) {
-    acc[key] = state[key]
-    return acc
-  }, {})
 }
 
 // Reducers
@@ -142,9 +100,10 @@ function clearCompleted (state, action) {
 }
 
 function toggleAll (state, action) {
-  var allDone = state.items.every(function (todo) {
+  var allDone = state.items.filter(function (todo) {
     return todo.done
-  })
+  }).length === state.items.length
+
   return {
     items: state.items.map(function (todo) {
       return xtend({}, todo, { done: !allDone })
@@ -154,6 +113,50 @@ function toggleAll (state, action) {
 
 function filter (state, action) {
   return { filter: action.payload }
+}
+
+// Local storage
+
+var STORAGE_ID = 'todos-choo'
+var keysToSave = ['counter', 'items']
+
+function getState () {
+  var json = window.localStorage.getItem(STORAGE_ID)
+  if (json) {
+    return JSON.parse(json)
+  } else {
+    return null
+  }
+}
+
+function saveState (state) {
+  window.localStorage.setItem(STORAGE_ID, JSON.stringify(state))
+}
+
+function initModel (send, done) {
+  try {
+    var state = getState()
+    if (state) {
+      send('todos:init', { payload: state }, done)
+    } else {
+      done()
+    }
+  } catch (e) {
+    done(e)
+  }
+}
+
+function equalProps (keys, state, prev) {
+  return keys.reduce(function (acc, key) {
+    return acc && state[key] === prev[key]
+  }, true)
+}
+
+function pick (keys, state) {
+  return keys.reduce(function (acc, key) {
+    acc[key] = state[key]
+    return acc
+  }, {})
 }
 
 function onStateChange (state, data, prev, caller, createSend) {

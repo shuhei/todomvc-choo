@@ -1,35 +1,35 @@
 var html = require('choo/html')
 
-module.exports = function footerView (todos, prev, send) {
-  var activeCount = todos.items.filter(function (todo) {
+module.exports = function footerView (state, prev, send) {
+  var activeCount = state.items.filter(function (todo) {
     return !todo.done
   }).length
-  var someDone = todos.items.some(isDone)
+  var hasDone = state.items.filter(function (todo) {
+    return todo.done
+  }).length > 0
 
   return html`
     <footer class="footer">
       <span class="todo-count">
         <strong>${activeCount}</strong>
-        item${todos.items.length === 1 ? '' : 's'} left
+        item${state.items.length === 1 ? '' : 's'} left
       </span>
       <ul class="filters">
-        ${filterButton('All', '', todos, send)}
-        ${filterButton('Active', 'active', todos, send)}
-        ${filterButton('Completed', 'completed', todos, send)}
+        ${filterButton('All', '', state.filter, send)}
+        ${filterButton('Active', 'active', state.filter, send)}
+        ${filterButton('Completed', 'completed', state.filter, send)}
       </ul>
-      ${someDone ? clearCompletedButton(send) : ''}
+      ${hasDone ? clearCompletedButton(send) : ''}
     </footer>
   `
 }
 
-function filterButton (name, filter, state, send) {
+function filterButton (name, filter, currentFilter, send) {
+  var klass = filter === currentFilter ? 'selected' : ''
+
   return html`
     <li>
-      <a
-        href="#"
-        onclick=${applyFilter(filter, send)}
-        class=${selectedClass(state.filter, filter)}
-      >${name}</a>
+      <a href="#" class=${klass} onclick=${applyFilter(filter, send)}>${name}</a>
     </li>
   `
 }
@@ -49,17 +49,8 @@ function clearCompleted (send) {
   }
 }
 
-function selectedClass (selectedFilter, filter) {
-  return selectedFilter === filter ? 'selected' : ''
-}
-
 function applyFilter (filter, send) {
   return function (e) {
     send('todos:filter', { payload: filter })
-    e.preventDefault()
   }
-}
-
-function isDone (todo) {
-  return todo.done
 }
