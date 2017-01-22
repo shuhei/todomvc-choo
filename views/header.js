@@ -14,7 +14,7 @@ module.exports = function headerView (todos, prev, send) {
 
   function addTodo (e) {
     if (e.keyCode === 13) {
-      send('todos:add', { payload: e.target.value })
+      send('todos:add', { name: e.target.value })
       e.target.value = ''
     }
   }

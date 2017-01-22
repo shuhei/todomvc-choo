@@ -34,7 +34,7 @@ function filterButton (name, filter, currentFilter, send) {
   `
 
   function applyFilter () {
-    send('todos:filter', { payload: filter })
+    send('todos:filter', { filter: filter })
   }
 }
 

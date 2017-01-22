@@ -11,13 +11,12 @@ module.exports = {
     items: []
   },
   reducers: {
-    init: init,
     add: add,
     toggle: toggle,
     edit: edit,
     cancelEditing: cancelEditing,
     update: update,
-    delete: deleteItem,
+    destroy: destroy,
     clearCompleted: clearCompleted,
     toggleAll: toggleAll,
     filter: filter
@@ -26,14 +25,10 @@ module.exports = {
 
 // Reducers
 
-function init (state, action) {
-  return { counter: action.payload.counter, items: action.payload.items }
-}
-
-function add (state, action) {
+function add (state, data) {
   var newItem = {
     id: state.counter,
-    name: action.payload,
+    name: data.name,
     done: false
   }
   return {
@@ -42,10 +37,10 @@ function add (state, action) {
   }
 }
 
-function toggle (state, action) {
+function toggle (state, data) {
   return {
     items: state.items.map(function (todo) {
-      if (todo.id === action.payload) {
+      if (todo.id === data.id) {
         return xtend({}, todo, { done: !todo.done })
       } else {
         return todo
@@ -54,20 +49,20 @@ function toggle (state, action) {
   }
 }
 
-function edit (state, action) {
-  return { editing: action.payload }
+function edit (state, data) {
+  return { editing: data.id }
 }
 
-function cancelEditing (state, action) {
+function cancelEditing (state, data) {
   return { editing: null }
 }
 
-function update (state, action) {
+function update (state, data) {
   return {
     editing: null,
     items: state.items.map(function (todo) {
-      if (todo.id === action.payload.id) {
-        return xtend({}, todo, { name: action.payload.name })
+      if (todo.id === data.id) {
+        return xtend({}, todo, { name: data.name })
       } else {
         return todo
       }
@@ -75,15 +70,15 @@ function update (state, action) {
   }
 }
 
-function deleteItem (state, action) {
+function destroy (state, data) {
   return {
     items: state.items.filter(function (todo) {
-      return todo.id !== action.payload
+      return todo.id !== data.id
     })
   }
 }
 
-function clearCompleted (state, action) {
+function clearCompleted (state, data) {
   return {
     items: state.items.filter(function (todo) {
       return !todo.done
@@ -91,7 +86,7 @@ function clearCompleted (state, action) {
   }
 }
 
-function toggleAll (state, action) {
+function toggleAll (state, data) {
   var allDone = state.items.filter(function (todo) {
     return todo.done
   }).length === state.items.length
@@ -103,6 +98,6 @@ function toggleAll (state, action) {
   }
 }
 
-function filter (state, action) {
-  return { filter: action.payload }
+function filter (state, data) {
+  return { filter: data.filter }
 }

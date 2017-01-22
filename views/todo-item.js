@@ -26,20 +26,19 @@ module.exports = function todoItemView (todo, editing, send) {
   `
 
   function toggle (e) {
-    send('todos:toggle', { payload: todo.id })
+    send('todos:toggle', { id: todo.id })
   }
 
   function edit (e) {
-    send('todos:edit', { payload: todo.id })
+    send('todos:edit', { id: todo.id })
   }
 
   function destroy (e) {
-    send('todos:delete', { payload: todo.id })
+    send('todos:destroy', { id: todo.id })
   }
 
   function update (e) {
-    var payload = { id: todo.id, name: e.target.value }
-    send('todos:update', { payload: payload })
+    send('todos:update', { id: todo.id, name: e.target.value })
   }
 
   function handleEditKeydown (e) {
