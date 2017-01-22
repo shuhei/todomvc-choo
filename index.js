@@ -1,4 +1,6 @@
 var choo = require('choo')
+var mount = require('choo/mount')
+var persist = require('choo-persist')
 var css = require('sheetify')
 var mainView = require('./views/main')
 var model = require('./model')
@@ -13,10 +15,6 @@ app.router([
   ['/', mainView],
 ])
 
-app.use({
-  onStateChange: model.onStateChange
-})
-
 if (module.parent) {
   module.exports = app
 } else {
@@ -25,6 +23,8 @@ if (module.parent) {
     root.setAttribute('id', 'root')
     document.body.appendChild(root)
   }
-  var mount = require('choo/mount')
-  mount('#root', app.start())
+  persist({ name: 'todomvc-choo' }, function (plugin) {
+    app.use(plugin)
+    mount('#root', app.start())
+  })
 }

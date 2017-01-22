@@ -5,7 +5,6 @@ module.exports = {
   state: {
     // UI state
     editing: null,
-    name: '',
     filter: '',
     // real state
     counter: 0,
@@ -13,7 +12,6 @@ module.exports = {
   },
   reducers: {
     init: init,
-    updateNew: updateNew,
     add: add,
     toggle: toggle,
     edit: edit,
@@ -23,13 +21,7 @@ module.exports = {
     clearCompleted: clearCompleted,
     toggleAll: toggleAll,
     filter: filter
-  },
-  subscriptions: {
-    init: initModel
-  },
-
-  // This is not for the model. But I put this here to colocate it with other model functions.
-  onStateChange: onStateChange
+  }
 }
 
 // Reducers
@@ -38,15 +30,15 @@ function init (state, action) {
   return { counter: action.payload.counter, items: action.payload.items }
 }
 
-function updateNew (state, action) {
-  return { name: action.payload }
-}
-
 function add (state, action) {
+  var newItem = {
+    id: state.counter,
+    name: action.payload,
+    done: false
+  }
   return {
     counter: state.counter + 1,
-    name: '',
-    items: state.items.concat({ id: state.counter, name: state.name, done: false })
+    items: state.items.concat(newItem)
   }
 }
 
@@ -113,54 +105,4 @@ function toggleAll (state, action) {
 
 function filter (state, action) {
   return { filter: action.payload }
-}
-
-// Local storage
-
-var STORAGE_ID = 'todos-choo'
-var keysToSave = ['counter', 'items']
-
-function getState () {
-  var json = window.localStorage.getItem(STORAGE_ID)
-  if (json) {
-    return JSON.parse(json)
-  } else {
-    return null
-  }
-}
-
-function saveState (state) {
-  window.localStorage.setItem(STORAGE_ID, JSON.stringify(state))
-}
-
-function initModel (send, done) {
-  try {
-    var state = getState()
-    if (state) {
-      send('todos:init', { payload: state }, done)
-    } else {
-      done()
-    }
-  } catch (e) {
-    done(e)
-  }
-}
-
-function equalProps (keys, state, prev) {
-  return keys.reduce(function (acc, key) {
-    return acc && state[key] === prev[key]
-  }, true)
-}
-
-function pick (keys, state) {
-  return keys.reduce(function (acc, key) {
-    acc[key] = state[key]
-    return acc
-  }, {})
-}
-
-function onStateChange (state, data, prev, caller, createSend) {
-  if (prev && prev.todos && !equalProps(keysToSave, state.todos, prev.todos)) {
-    saveState(pick(keysToSave, state.todos))
-  }
 }
