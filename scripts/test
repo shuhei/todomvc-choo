@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e -o pipefail
+
+e2e () {
+  npm start &> /dev/null &
+  ./node_modules/.bin/webdriver-manager start &> /dev/null &
+  while ! nc -z localhost 8080; do sleep 1; done
+  while ! nc -z localhost 4444; do sleep 1; done
+
+  trap cleanup_e2e ERR
+
+  node e2e.js
+}
+
+cleanup_e2e() {
+  lsof -nti:8080 | xargs kill -2
+  lsof -nti:4444 | xargs kill -2
+}
+
+case "$1" in
+  e2e) shift; e2e "$@";;
+esac

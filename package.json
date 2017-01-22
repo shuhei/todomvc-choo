@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "bankai index.js",
+    "e2e": "scripts/test e2e",
     "build": "bankai build -O index.js dist && node render.js > dist/index.html",
     "lint": "standard"
   },
@@ -21,6 +22,9 @@
     "bankai": "^5.2.1",
     "create-html": "^1.1.0",
     "hyperstream": "^1.2.2",
-    "standard": "^8.6.0"
+    "standard": "^8.6.0",
+    "tape": "^4.6.3",
+    "webdriver-manager": "^11.1.1",
+    "webdriverio": "^4.6.1"
   }
 }
