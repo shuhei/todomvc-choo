@@ -22,7 +22,7 @@ function updateNew (send) {
   }
 }
 
-function addTodo(send) {
+function addTodo (send) {
   return function (e) {
     if (e.keyCode === 13) {
       send('todos:add')

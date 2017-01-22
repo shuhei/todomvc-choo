@@ -43,7 +43,7 @@ function clearCompletedButton (send) {
   `
 }
 
-function clearCompleted(send) {
+function clearCompleted (send) {
   return function () {
     send('todos:clearCompleted')
   }
@@ -60,6 +60,6 @@ function applyFilter (filter, send) {
   }
 }
 
-function isDone(todo) {
+function isDone (todo) {
   return todo.done
 }
