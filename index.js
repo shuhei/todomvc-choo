@@ -12,7 +12,7 @@ var app = choo()
 app.model(model)
 
 app.router([
-  ['/', mainView],
+  ['/', mainView]
 ])
 
 if (module.parent) {

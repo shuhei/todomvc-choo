@@ -15,16 +15,14 @@ module.exports = function todoListView (todos, prev, send) {
         class="toggle-all"
         type="checkbox"
         checked=${allDone}
-        onchange=${toggleAll(send)}
+        onchange=${toggleAll}
       />
       <label for="toggle-all" style="display: none;">Mark all as complete</label>
       <ul class="todo-list">${itemViews}</ul>
     </section>
   `
-}
 
-function toggleAll (send) {
-  return function () {
+  function toggleAll () {
     send('todos:toggleAll')
   }
 }

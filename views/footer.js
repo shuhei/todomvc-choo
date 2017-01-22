@@ -29,28 +29,24 @@ function filterButton (name, filter, currentFilter, send) {
 
   return html`
     <li>
-      <a href="#" class=${klass} onclick=${applyFilter(filter, send)}>${name}</a>
+      <a href="#" class=${klass} onclick=${applyFilter}>${name}</a>
     </li>
   `
+
+  function applyFilter () {
+    send('todos:filter', { payload: filter })
+  }
 }
 
 function clearCompletedButton (send) {
   return html`
     <button
       class="clear-completed"
-      onclick=${clearCompleted(send)}
+      onclick=${clearCompleted}
     >Clear completed</button>
   `
-}
 
-function clearCompleted (send) {
-  return function () {
+  function clearCompleted () {
     send('todos:clearCompleted')
-  }
-}
-
-function applyFilter (filter, send) {
-  return function (e) {
-    send('todos:filter', { payload: filter })
   }
 }

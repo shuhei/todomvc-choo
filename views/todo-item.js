@@ -8,53 +8,43 @@ module.exports = function todoItemView (todo, editing, send) {
           type="checkbox"
           class="toggle"
           checked="${todo.done}"
-          onchange=${toggle(todo, send)}
+          onchange=${toggle}
         />
-        <label ondblclick=${edit(todo, send)}>${todo.name}</label>
+        <label ondblclick=${edit}>${todo.name}</label>
         <button
           class="destroy"
-          onclick=${destroy(todo, send)}
+          onclick=${destroy}
         ></button>
       </div>
       <input
         class="edit"
         value=${todo.name}
-        onkeydown=${handleEditKeydown(todo, send)}
-        onblur=${update(todo, send)}
+        onkeydown=${handleEditKeydown}
+        onblur=${update}
       />
     </li>
   `
-}
 
-function toggle (todo, send) {
-  return function (e) {
+  function toggle (e) {
     send('todos:toggle', { payload: todo.id })
   }
-}
 
-function edit (todo, send) {
-  return function (e) {
+  function edit (e) {
     send('todos:edit', { payload: todo.id })
   }
-}
 
-function destroy (todo, send) {
-  return function (e) {
+  function destroy (e) {
     send('todos:delete', { payload: todo.id })
   }
-}
 
-function update (todo, send) {
-  return function (e) {
+  function update (e) {
     var payload = { id: todo.id, name: e.target.value }
     send('todos:update', { payload: payload })
   }
-}
 
-function handleEditKeydown (todo, send) {
-  return function (e) {
+  function handleEditKeydown (e) {
     if (e.keyCode === 13) { // Enter
-      update(todo, send)(e)
+      update(e)
     } else if (e.code === 27) { // Escape
       send('todos:cancelEditing')
     }
